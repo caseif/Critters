@@ -1,0 +1,45 @@
+plugins {
+	id 'java'
+	id 'maven'
+	id 'eclipse'
+	id 'idea'
+	id 'com.github.johnrengelman.shadow' version '1.2.0'
+}
+
+defaultTasks 'clean', 'build', 'shadowJar'
+
+group = 'net.caseif.critters'
+archivesBaseName = 'critters'
+version = '1.0.0-SNAPSHOT'
+
+ext.projectName = 'Critters'
+ext.packaging = 'jar'
+
+ext {
+	asm = 'org.ow2.asm:asm:5.0.3'
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+	compile asm
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+jar {
+	classifier = 'base'
+}
+
+shadowJar {
+	dependencies {
+		include dependency(asm)
+	}
+}
