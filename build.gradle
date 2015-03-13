@@ -36,6 +36,13 @@ tasks.withType(JavaCompile) {
 
 jar {
 	classifier = 'base'
+	manifest {
+		attributes(
+				'Implementation-Title': project.name,
+				'Implementation-Version': version,
+				'Main-Class': 'CritterMain',
+		)
+	}
 }
 
 shadowJar {
