@@ -2,7 +2,6 @@ import java.awt.*;
 import java.awt.event.WindowListener;
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Map;
 
 public class HuskyRoncace extends Critter {
 
@@ -15,6 +14,7 @@ public class HuskyRoncace extends Critter {
 	private int iteration = 5;
 	private Direction dir = Direction.CENTER;
 
+	private static final Attack fallbackAttack = Attack.values()[(int)(Math.random() * Attack.values().length)];
 	private static boolean isSpeciescideComplete = false;
 
 	private static final String[] dongers = {
@@ -108,7 +108,7 @@ public class HuskyRoncace extends Critter {
 			ex.printStackTrace();
 		}
 		if (counter == null) {
-			counter = Attack.POUNCE;
+			counter = fallbackAttack;
 		}
 		return counter;
 	}
@@ -146,5 +146,4 @@ public class HuskyRoncace extends Critter {
 	private static double distance(int x1, int y1, int x2, int y2) {
 		return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 	}
-
 }
