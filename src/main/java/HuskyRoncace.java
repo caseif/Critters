@@ -6,8 +6,11 @@ import java.util.Collection;
 public class HuskyRoncace extends Critter {
 
 	private static CritterModel model = null;
-
 	private static Field critterList = null;
+
+	private boolean hasEaten = false;
+	private int iteration = 5;
+	private Direction dir = Direction.CENTER;
 
 	private static void cheat() {
 		try {
@@ -29,6 +32,11 @@ public class HuskyRoncace extends Critter {
 		catch (IllegalAccessException | NoSuchFieldException ex) {
 			throw new AssertionError();
 		}
+	}
+
+	@Override
+	public boolean eat() {
+		return !hasEaten && (hasEaten = true);
 	}
 
 	@Override
@@ -58,6 +66,31 @@ public class HuskyRoncace extends Critter {
 			ex.printStackTrace();
 		}
 		return Attack.POUNCE;
+	}
+
+	@Override
+	public Direction getMove() {
+		// I mean, hey, it works for the hippos
+		if (iteration == 5) {
+			iteration = 0;
+			int r = (int)(Math.random() * 4);
+			switch (r) {
+				case 0:
+					dir = Direction.NORTH;
+					break;
+				case 1:
+					dir = Direction.SOUTH;
+					break;
+				case 2:
+					dir = Direction.EAST;
+					break;
+				case 3:
+					dir = Direction.WEST;
+					break;
+			}
+		}
+		++iteration;
+		return dir;
 	}
 
 	@Override
