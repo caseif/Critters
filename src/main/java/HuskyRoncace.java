@@ -8,9 +8,31 @@ public class HuskyRoncace extends Critter {
 	private static CritterModel model = null;
 	private static Field critterList = null;
 
+	private final String donger;
+
 	private boolean hasEaten = false;
 	private int iteration = 5;
 	private Direction dir = Direction.CENTER;
+
+	private static final String[] dongers = {
+			"(つ ◕_◕)つ",
+			"(つ°ヮ°)つ",
+			"╰(◕ヮ ◕)╯",
+			"(´∀ `)",
+			"└╏･ヮ ･╏┐",
+			"ლ(❛Д❛ლ)"
+			// >tfw no lenny
+			// >tfw no raise your dongers
+	};
+
+	public HuskyRoncace() {
+		donger = dongers[(int)(Math.random() * dongers.length)];
+	}
+
+	@Override
+	public String toString() {
+		return donger;
+	}
 
 	private static void cheat() {
 		try {
@@ -96,11 +118,6 @@ public class HuskyRoncace extends Critter {
 	@Override
 	public Color getColor() {
 		return Color.MAGENTA;
-	}
-
-	@Override
-	public String toString() {
-		return "(つ ◕_◕ )つ";
 	}
 
 	private static double distance(int x1, int y1, int x2, int y2) {
