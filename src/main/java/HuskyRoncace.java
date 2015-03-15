@@ -1,73 +1,63 @@
-import java.awt.Color;
-import java.io.IOException;
-
-import static org.objectweb.asm.Opcodes.ACC_SUPER;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.F_SAME;
-import static org.objectweb.asm.Opcodes.IFEQ;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
+import java.awt.*;
+import java.awt.event.WindowListener;
+import java.lang.reflect.Field;
+import java.util.Collection;
 
 public class HuskyRoncace extends Critter {
 
-	static {
+	private static CritterModel model = null;
+
+	private static Field critterList = null;
+
+	private static void cheat() {
 		try {
-			ClassReader cr = new ClassReader("CritterMain");
-			ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-			MethodVisitor mv;
-
-			cw.visit(52, ACC_SUPER, "CritterModel", "Ljava/util/Observable;Ljava/lang/Iterable<LCritter;>;", "java/util/Observable", new String[]{"java/lang/Iterable"});
-
-			cw.visitSource("CritterMain2.java", null);
-			{
-				mv = cw.visitMethod(ACC_PRIVATE, "fight", "(LCritter;LCritter;Ljava/lang/String;Ljava/lang/String;)LCritter;", null, null);
-				mv.visitCode();
-				Label l15 = new Label();
-				mv.visitLabel(l15);
-				mv.visitLineNumber(2142, l15);
-				mv.visitVarInsn(ALOAD, 1);
-				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;", false);
-				mv.visitLdcInsn("Roncace");
-				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "endsWith", "(Ljava/lang/String;)Z", false);
-				Label l16 = new Label();
-				mv.visitJumpInsn(IFEQ, l16);
-				Label l17 = new Label();
-				mv.visitLabel(l17);
-				mv.visitLineNumber(2143, l17);
-				mv.visitVarInsn(ALOAD, 1);
-				mv.visitInsn(ARETURN);
-				mv.visitLabel(l16);
-				mv.visitLineNumber(2145, l16);
-				mv.visitFrame(F_SAME, 0, null, 0, null);
-				mv.visitVarInsn(ALOAD, 2);
-				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;", false);
-				mv.visitLdcInsn("Roncace");
-				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "endsWith", "(Ljava/lang/String;)Z", false);
-				Label l18 = new Label();
-				mv.visitJumpInsn(IFEQ, l18);
-				Label l19 = new Label();
-				mv.visitLabel(l19);
-				mv.visitLineNumber(2146, l19);
-				mv.visitVarInsn(ALOAD, 2);
-				mv.visitInsn(ARETURN);
-				mv.visitMaxs(2, 5);
-				mv.visitEnd();
+			outer:
+			for (Window f : Window.getWindows()) {
+				for (WindowListener l : f.getWindowListeners()) {
+					if (l instanceof CritterGui) {
+						CritterGui gui = (CritterGui)l;
+						Field modelField = gui.getClass().getDeclaredField("model");
+						modelField.setAccessible(true);
+						model = (CritterModel)modelField.get(gui);
+						critterList = model.getClass().getDeclaredField("critterList");
+						critterList.setAccessible(true);
+						break outer;
+					}
+				}
 			}
-			cw.visitEnd();
-			cr.accept(cw, 0);
 		}
-		catch (IOException ex) {
+		catch (IllegalAccessException | NoSuchFieldException ex) {
+			throw new AssertionError();
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Attack fight(String opponent) {
+		try {
+			if (critterList == null) {
+				cheat();
+			}
+			Collection<Critter> critters = (Collection<Critter>)critterList.get(model);
+			for (Critter c : critters) {
+				if (distance(this.getX(), this.getY(), c.getX(), c.getY()) == 0
+						&& c.toString().equals(opponent)) {
+					Attack attack = c.fight(this.toString());
+					switch (attack) {
+						case POUNCE:
+							return Attack.SCRATCH;
+						case SCRATCH:
+							return Attack.ROAR;
+						case ROAR:
+							return Attack.POUNCE;
+					}
+				}
+			}
+		}
+		catch (IllegalAccessException ex) {
 			ex.printStackTrace();
-			System.err.println("Failed to visit methods! Remaining confined to morality...");
 		}
+		return Attack.POUNCE;
 	}
 
 	@Override
@@ -78,6 +68,10 @@ public class HuskyRoncace extends Critter {
 	@Override
 	public String toString() {
 		return "(つ ◕_◕ )つ";
+	}
+
+	private static double distance(int x1, int y1, int x2, int y2) {
+		return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(x1 - x2, 2));
 	}
 
 }
