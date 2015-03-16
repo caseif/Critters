@@ -82,7 +82,7 @@ public class HuskyRoncace extends Critter {
 			Collection<Critter> critters = (Collection<Critter>)critterList.get(model);
 			boolean others = false;
 			for (Critter c : critters) {
-				if (c != this && distance(this.getX(), this.getY(), c.getX(), c.getY()) == 0
+				if (c != this && this.getX() == c.getX() && this.getY() == c.getY()
 						&& c.toString().equals(opponent)) {
 					Attack attack = c.fight(this.toString());
 					switch (attack) {
@@ -145,9 +145,5 @@ public class HuskyRoncace extends Critter {
 	@Override
 	public Color getColor() {
 		return Color.MAGENTA;
-	}
-
-	private static double distance(int x1, int y1, int x2, int y2) {
-		return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 	}
 }
