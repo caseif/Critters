@@ -13,6 +13,7 @@ public class HuskyRoncace extends Critter {
 	private boolean hasEaten = false;
 	private int iteration = 5;
 	private Direction dir = Direction.CENTER;
+	private boolean avoidStalemate = false;
 
 	private static final Attack fallbackAttack = Attack.values()[(int)(Math.random() * Attack.values().length)];
 	private static boolean isSpeciescideComplete = false;
@@ -74,6 +75,15 @@ public class HuskyRoncace extends Critter {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Attack fight(String opponent) {
+		StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+		if (trace.length > 2 && trace[2].getMethodName().equals("fight")
+				&& trace[2].getClassName().startsWith("Husky") && !trace[2].getClassName().equals("HuskyRoncace")) {
+			avoidStalemate = true;
+			return Attack.POUNCE;
+		}
+		else if (avoidStalemate) {
+			return Attack.SCRATCH;
+		}
 		Attack counter = null;
 		try {
 			if (critterList == null) {
