@@ -2952,7 +2952,7 @@ class ClassUtils {
 	public static final String JAVA_EXTENSION = ".java";
 	private static final FileFilter CLASS_FILTER = new ExtensionFilter(CLASS_EXTENSION);
 	private static final boolean SHOULD_CACHE = false;
-	private static final String[] DEFAULT_CRITTERS = {"Ant", "Bird", "Hippo", "Husky", "Stone", "Vulture"};
+	private static final String[] DEFAULT_CRITTERS = {"Ant", "Bird", "Hippo", "Husky", "Vulture"};
 
 	// Adds 25 of each critter class type to the given model.
 	// The only critter-specific code in here; a bit of a cheat

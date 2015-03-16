@@ -1,21 +1,28 @@
 import java.awt.*;
 import java.awt.event.WindowListener;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HuskyRoncace extends Critter {
 
 	private static CritterModel model = null;
 	private static Field critterList = null;
 
+	private static final int MOVE_DISTANCE = 3;
+
 	private final String donger;
 
 	private boolean hasEaten = false;
-	private int iteration = 5;
+	private int iteration = MOVE_DISTANCE;
 	private Direction dir = Direction.CENTER;
 	private boolean avoidStalemate = false;
+	private String currentDisguise = disguises[(int)(Math.random() * disguises.length)];
 
-	private static final Attack fallbackAttack = Attack.values()[(int)(Math.random() * Attack.values().length)];
+	private static final Attack fallbackAttack = Attack.values()[(int)(Math.random() * 3)];
+
 	private static boolean isSpeciescideComplete = false;
 
 	private static final String[] dongers = {
@@ -29,6 +36,20 @@ public class HuskyRoncace extends Critter {
 			// >tfw no raise your dongers
 	};
 
+	private static final String[] disguises = {
+			"%",
+			"V",
+			"S",
+			"0"
+	};
+
+	private static final String[] fullDisguises = {
+			"%",
+			"V", "<", ">", "^",
+			"S",
+			"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+	};
+
 	public HuskyRoncace() {
 		donger = dongers[(int)(Math.random() * dongers.length)];
 	}
@@ -37,7 +58,8 @@ public class HuskyRoncace extends Critter {
 	public String toString() {
 		StackTraceElement[] trace = Thread.currentThread().getStackTrace();
 		if (trace.length > 2 && trace[2].getMethodName().equals("fight")) {
-			return "%"; // disguise as an ant to promote predictable behavior
+			// disguise to promote predictable behavior
+			return currentDisguise;
 		}
 		return donger;
 	}
@@ -77,12 +99,14 @@ public class HuskyRoncace extends Critter {
 	public Attack fight(String opponent) {
 		StackTraceElement[] trace = Thread.currentThread().getStackTrace();
 		if (trace.length > 2 && trace[2].getMethodName().equals("fight")
-				&& trace[2].getClassName().startsWith("Husky") && !trace[2].getClassName().equals("HuskyRoncace")) {
+				&& trace[2].getClassName().startsWith("Husky")
+				&& !trace[2].getClassName().equals("HuskyRoncace")) {
 			avoidStalemate = true;
-			return Attack.POUNCE;
+			return fallbackAttack;
 		}
 		else if (avoidStalemate) {
-			return Attack.SCRATCH;
+			avoidStalemate = false;
+			return getCounter(fallbackAttack);
 		}
 		Attack counter = null;
 		try {
@@ -94,18 +118,31 @@ public class HuskyRoncace extends Critter {
 			for (Critter c : critters) {
 				if (c != this && this.getX() == c.getX() && this.getY() == c.getY()
 						&& c.toString().equals(opponent)) {
-					Attack attack = c.fight(this.toString());
-					switch (attack) {
-						case POUNCE:
-							counter = Attack.SCRATCH;
-							break;
-						case SCRATCH:
-							counter = Attack.ROAR;
-							break;
-						case ROAR:
-							counter = Attack.POUNCE;
-							break;
+					if (Arrays.asList(fullDisguises).contains(opponent)
+						&& !(c instanceof Ant || c instanceof Bird || c instanceof Hippo || c instanceof Stone)) {
+						// train it to think a certain attack will work
+						final int TRAINING_DURATION = 50;
+						Attack[] attacks = new Attack[TRAINING_DURATION];
+						for (int i = 0; i < TRAINING_DURATION; i++) {
+							attacks[i] = c.fight(currentDisguise);
+							c.win();
+						}
+						HashMap<Attack, Integer> map = new HashMap<>();
+						for (Attack a : attacks) {
+							map.put(a, map.containsKey(a) ? map.get(a) + 1 : 1);
+						}
+						Attack mode = fallbackAttack;
+						int maxCounts = 0;
+						for (Map.Entry<Attack, Integer> e : map.entrySet()) {
+							if (e.getValue() > maxCounts) {
+								maxCounts = e.getValue();
+								mode = e.getKey();
+							}
+						}
+						return getCounter(mode);
 					}
+					Attack attack = c.fight(this.toString());
+					counter = getCounter(attack);
 				}
 				else if (!(c instanceof HuskyRoncace)) {
 					others = true;
@@ -129,8 +166,9 @@ public class HuskyRoncace extends Critter {
 
 	@Override
 	public Direction getMove() {
+		currentDisguise = disguises[(int)(Math.random() * disguises.length)];
 		// I mean, hey, it works for the hippos
-		if (iteration == 5) {
+		if (iteration == MOVE_DISTANCE) {
 			iteration = 0;
 			int r = (int)(Math.random() * 4);
 			switch (r) {
@@ -155,5 +193,17 @@ public class HuskyRoncace extends Critter {
 	@Override
 	public Color getColor() {
 		return Color.MAGENTA;
+	}
+
+	private static Attack getCounter(Attack attack) {
+		switch (attack) {
+			case POUNCE:
+				return Attack.SCRATCH;
+			case SCRATCH:
+				return Attack.ROAR;
+			case ROAR:
+				return Attack.POUNCE;
+		}
+		return Attack.values()[(int)(Math.random() * 3)];
 	}
 }

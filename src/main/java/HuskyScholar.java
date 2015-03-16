@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Scholar extends Critter {
+public class HuskyScholar extends Critter {
 
 	private String currentOpponent;
 	private Attack currentAttack;
@@ -12,18 +12,25 @@ public class Scholar extends Critter {
 	private int iteration = 5;
 	private Direction dir = Direction.CENTER;
 
-	private static final HashMap<String, Integer> pounceVictories = new HashMap<String, Integer>();
-	private static final HashMap<String, Integer> roarVictories = new HashMap<String, Integer>();
-	private static final HashMap<String, Integer> scratchVictories = new HashMap<String, Integer>();
-	private static final HashMap<String, Integer> pounceLosses = new HashMap<String, Integer>();
-	private static final HashMap<String, Integer> roarLosses = new HashMap<String, Integer>();
-	private static final HashMap<String, Integer> scratchLosses = new HashMap<String, Integer>();
+	private static final HashMap<String, Integer> pounceVictories = new HashMap<>();
+	private static final HashMap<String, Integer> roarVictories = new HashMap<>();
+	private static final HashMap<String, Integer> scratchVictories = new HashMap<>();
+	private static final HashMap<String, Integer> pounceLosses = new HashMap<>();
+	private static final HashMap<String, Integer> roarLosses = new HashMap<>();
+	private static final HashMap<String, Integer> scratchLosses = new HashMap<>();
 
 	private static boolean isSpeciescideComplete = false;
 
+	private static final String[] disguises = {
+			"%",
+			"V",
+			"S",
+			"0"
+	};
+
 	@Override
 	public String toString() {
-		return "#";
+		return disguises[(int)(Math.random() * disguises.length)];
 	}
 
 	@Override
@@ -40,7 +47,7 @@ public class Scholar extends Critter {
 		int lPounce = pounceLosses.containsKey(opponent) ? pounceLosses.get(opponent) : 0;
 		int lRoar = roarLosses.containsKey(opponent) ? roarLosses.get(opponent) : 0;
 		int lScratch = scratchLosses.containsKey(opponent) ? scratchLosses.get(opponent) : 0;
-		List<Attack> candidates = new ArrayList<Attack>();
+		List<Attack> candidates = new ArrayList<>();
 		if (lPounce == 0) {
 			candidates.add(Attack.POUNCE);
 		}
@@ -53,39 +60,49 @@ public class Scholar extends Critter {
 		if (candidates.size() > 0) {
 			return currentAttack = candidates.get((int)(Math.random() * candidates.size()));
 		}
-		if (vPounce / lPounce > vRoar / lRoar) {
-			candidates.add(Attack.POUNCE);
-			if (vRoar / lRoar > vScratch / lScratch) {
-				candidates.add(Attack.ROAR);
+		/*System.out.println((float)vRoar / (float)lRoar + ", " +
+				(float)vScratch / (float)lScratch + ", " +
+				(float)vPounce / (float)lPounce + " - " +
+				vRoar + "/" + lRoar + ", " +
+				vScratch + "/" + lScratch + ", " +
+				vPounce + "/" + lPounce + " - " +
+				candidates.get(0) +
+				(candidates.size() > 1 ? ", " + candidates.get(1) +
+						(candidates.size() > 2 ? ", " + candidates.get(2)
+								: "") : ""));*/
+		if (vPounce / (float)lPounce > vRoar / (float)lRoar) {
+			if (lPounce / (float)lPounce > vScratch / (float)lScratch) {
+				return currentAttack = Attack.POUNCE;
 			}
 			else {
-				candidates.add(Attack.SCRATCH);
+				return currentAttack = Attack.SCRATCH;
 			}
 		}
 		else {
-			candidates.add(Attack.ROAR);
-			if (vPounce / lPounce > vScratch / lScratch) {
-				candidates.add(Attack.POUNCE);
+			if (vRoar / (float)vRoar > vScratch / (float)lScratch) {
+				return currentAttack = Attack.ROAR;
 			}
 			else {
-				candidates.add(Attack.SCRATCH);
+				return currentAttack = Attack.SCRATCH;
 			}
 		}
-		return currentAttack = candidates.get((int)(Math.random() * candidates.size()));
+		//return currentAttack = candidates.get((int)(Math.random() * candidates.size()));
 	}
-	
+
 	@Override
 	public void win() {
 		HashMap<String, Integer> map;
 		switch (currentAttack) {
 			case POUNCE:
 				map = pounceVictories;
+				break;
 			case SCRATCH:
 				map = scratchVictories;
+				break;
 			default:
 				map = roarVictories;
 		}
-		map.put(currentOpponent, map.containsKey(currentOpponent) ? map.get(currentOpponent) : 1);
+		map.put(currentOpponent, map.containsKey(currentOpponent) ? map.get(currentOpponent) + 1 : 1);
 	}
 
 	@Override
@@ -94,12 +111,15 @@ public class Scholar extends Critter {
 		switch (currentAttack) {
 			case POUNCE:
 				map = pounceLosses;
+				break;
 			case SCRATCH:
 				map = scratchLosses;
+				break;
 			default:
 				map = roarLosses;
+				break;
 		}
-		map.put(currentOpponent, map.containsKey(currentOpponent) ? map.get(currentOpponent) : 1);
+		map.put(currentOpponent, map.containsKey(currentOpponent) ? map.get(currentOpponent) + 1 : 1);
 	}
 
 	@Override
@@ -109,18 +129,18 @@ public class Scholar extends Critter {
 			iteration = 0;
 			int r = (int)(Math.random() * 4);
 			switch (r) {
-			case 0:
-				dir = Direction.NORTH;
-				break;
-			case 1:
-				dir = Direction.SOUTH;
-				break;
-			case 2:
-				dir = Direction.EAST;
-				break;
-			case 3:
-				dir = Direction.WEST;
-				break;
+				case 0:
+					dir = Direction.NORTH;
+					break;
+				case 1:
+					dir = Direction.SOUTH;
+					break;
+				case 2:
+					dir = Direction.EAST;
+					break;
+				case 3:
+					dir = Direction.WEST;
+					break;
 			}
 		}
 		++iteration;
