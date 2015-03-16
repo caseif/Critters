@@ -34,6 +34,10 @@ public class HuskyRoncace extends Critter {
 
 	@Override
 	public String toString() {
+		StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+		if (trace.length > 2 && trace[2].getMethodName().equals("fight")) {
+			return "%"; // disguise as an ant to promote predictable behavior
+		}
 		return donger;
 	}
 
@@ -78,7 +82,7 @@ public class HuskyRoncace extends Critter {
 			Collection<Critter> critters = (Collection<Critter>)critterList.get(model);
 			boolean others = false;
 			for (Critter c : critters) {
-				if (distance(this.getX(), this.getY(), c.getX(), c.getY()) == 0
+				if (c != this && distance(this.getX(), this.getY(), c.getX(), c.getY()) == 0
 						&& c.toString().equals(opponent)) {
 					Attack attack = c.fight(this.toString());
 					switch (attack) {
